@@ -1,5 +1,3 @@
-# GitHub Actions workflow to build and deploy Python project to Azure Function App
-
 name: Build and deploy Python project to Azure Function App - financial-data-functions
 
 on:
@@ -9,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # Path to your function app project (default is root)
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # Path to your function app project
   PYTHON_VERSION: '3.11' # Ensure this matches the Azure Function runtime version
 
 jobs:
@@ -30,12 +28,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # Ensure ZIP utility is installed
       - name: Install ZIP Utility
         run: sudo apt-get install zip -y
 
       - name: Zip artifact for deployment
-        run: zip -r release.zip ./* -x "venv/*"
+        run: zip -r release.zip ./* -x "venv/*" ".git/*"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -58,6 +55,10 @@ jobs:
 
       - name: Unzip artifact for deployment
         run: unzip release.zip     
+
+      - name: Restart Azure Function App (Prevent Stale Deployment)
+        run: |
+          az functionapp restart --name financial-data-functions --resource-group financial-project-rg
 
       - name: Deploy to Azure Functions
         uses: Azure/functions-action@v1
