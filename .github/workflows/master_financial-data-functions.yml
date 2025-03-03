@@ -56,10 +56,6 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip     
 
-      - name: Restart Azure Function App (Prevent Stale Deployment)
-        run: |
-          az functionapp restart --name financial-data-functions --resource-group financial-project-rg
-
       - name: Deploy to Azure Functions
         uses: Azure/functions-action@v1
         id: deploy-to-function
