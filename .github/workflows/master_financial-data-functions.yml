@@ -1,6 +1,4 @@
-# Docs for the Azure Functions Deploy action: https://github.com/Azure/functions-action
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-# More info on Python, GitHub Actions, and Azure Functions: https://aka.ms/python-webapps-actions
+# GitHub Actions workflow to build and deploy Python project to Azure Function App
 
 name: Build and deploy Python project to Azure Function App - financial-data-functions
 
@@ -11,8 +9,8 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # Path to your web app project (default is root)
-  PYTHON_VERSION: '3.11' # Ensure this matches your Azure Function App runtime version
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # Path to your function app project (default is root)
+  PYTHON_VERSION: '3.11' # Ensure this matches the Azure Function runtime version
 
 jobs:
   build:
@@ -29,15 +27,12 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Create and start virtual environment
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # Optional: Add step to run tests here if needed
+      # Ensure ZIP utility is installed
+      - name: Install ZIP Utility
+        run: sudo apt-get install zip -y
 
       - name: Zip artifact for deployment
         run: zip -r release.zip ./* -x "venv/*"
@@ -68,6 +63,6 @@ jobs:
         uses: Azure/functions-action@v1
         id: deploy-to-function
         with:
-          app-name: 'financial-data-functions'
+          app-name: 'financial-data-functions'  # Ensure this EXACTLY matches your Azure Function App name
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
